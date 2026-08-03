@@ -46,7 +46,11 @@ const lambda_log_wrapper = (
         trace.timeoutInSec = Math.ceil(timeout_duration / 1000)
         timeout_id = setTimeout(async () => {
           trace.likely_timeout = true
-          await sendEvent(trace, context, start_time)
+          try {
+            await sendEvent(trace, context, start_time)
+          } catch (err) {
+            console.error('hll: failed to send timeout event:', err.message)
+          }
         }, timeout_duration - 250)
         const match = context.invokedFunctionArn.match(ARN_PARSER)
         trace.context.region = match && match.length >= 3 ? match[2] : null
@@ -77,7 +81,11 @@ const lambda_log_wrapper = (
     } finally {
       clearTimeout(timeout_id)
       trace.handle = global.hll_handle_log
-      await sendEvent(trace, context, start_time)
+      try {
+        await sendEvent(trace, context, start_time)
+      } catch (err) {
+        console.error('hll: failed to send event in finally block:', err.message)
+      }
       cold_start = false
     }
   }

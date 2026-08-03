@@ -28,3 +28,26 @@ test('honeycomb to send the event if configured', async () => {
   expect(time).toBeLessThan(Date.now())
   expect(time).toBeGreaterThan(Date.now() - 60 * 1000)
 })
+
+test('honeycomb send failure is caught and logged', async () => {
+  jest.resetModules()
+  const r2 = require('r2')
+  jest.mock('r2')
+  process.env.HONEYCOMB_WRITE_KEY = 'abcd12345'
+  process.env.HLL_DATASET = 'test-dataset'
+  const honeycomb = require('../src/honeycomb')
+  r2.post.mockReturnValue({
+    get response() {
+      throw new Error('network failure')
+    },
+  })
+
+  const spy = jest.spyOn(console, 'error').mockImplementation(() => {})
+  await honeycomb.sendEvent({ test: true })
+  expect(r2.post).toHaveBeenCalledTimes(1)
+  expect(spy).toHaveBeenCalledWith(
+    'hll: failed to send event to Honeycomb:',
+    'network failure'
+  )
+  spy.mockRestore()
+})
