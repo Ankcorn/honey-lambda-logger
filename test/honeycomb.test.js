@@ -47,7 +47,8 @@ test('honeycomb send failure is caught and logged', async () => {
   expect(r2.post).toHaveBeenCalledTimes(1)
   expect(spy).toHaveBeenCalledWith(
     'hll: failed to send event to Honeycomb:',
-    'network failure'
+    expect.any(Error)
   )
+  expect(spy.mock.calls[0][1].message).toEqual('network failure')
   spy.mockRestore()
 })

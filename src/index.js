@@ -49,7 +49,7 @@ const lambda_log_wrapper = (
           try {
             await sendEvent(trace, context, start_time)
           } catch (err) {
-            console.error('hll: failed to send timeout event:', err.message)
+            console.error('hll: failed to send timeout event:', err)
           }
         }, timeout_duration - 250)
         const match = context.invokedFunctionArn.match(ARN_PARSER)
@@ -84,7 +84,7 @@ const lambda_log_wrapper = (
       try {
         await sendEvent(trace, context, start_time)
       } catch (err) {
-        console.error('hll: failed to send event in finally block:', err.message)
+        console.error('hll: failed to send event in finally block:', err)
       }
       cold_start = false
     }

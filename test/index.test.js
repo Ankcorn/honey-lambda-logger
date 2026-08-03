@@ -122,8 +122,9 @@ test('sendEvent failure in finally does not mask original result', async () => {
   expect(result).toEqual(event)
   expect(spy).toHaveBeenCalledWith(
     'hll: failed to send event in finally block:',
-    'honeycomb down'
+    expect.any(Error)
   )
+  expect(spy.mock.calls[0][1].message).toEqual('honeycomb down')
   spy.mockRestore()
 })
 
@@ -138,8 +139,9 @@ test('sendEvent failure in finally does not mask original error', async () => {
   await expect(fn(event, context)).rejects.toThrow('lambda failed')
   expect(spy).toHaveBeenCalledWith(
     'hll: failed to send event in finally block:',
-    'honeycomb down'
+    expect.any(Error)
   )
+  expect(spy.mock.calls[0][1].message).toEqual('honeycomb down')
   spy.mockRestore()
 })
 

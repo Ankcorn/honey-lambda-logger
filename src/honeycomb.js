@@ -13,7 +13,7 @@ const sendEvent = async (event) => {
     try {
       await r2.post(url, { json: event, headers }).response
     } catch (err) {
-      console.error('hll: failed to send event to Honeycomb:', err.message)
+      console.error('hll: failed to send event to Honeycomb:', err)
     }
   }
 }
