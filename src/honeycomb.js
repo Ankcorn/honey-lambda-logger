@@ -10,7 +10,11 @@ const sendEvent = async (event) => {
       'X-Honeycomb-Event-Time': Date.now(),
     }
     const url = `https://api.honeycomb.io/1/events/${encodeURL(process.env.HLL_DATASET)}`
-    await r2.post(url, { json: event, headers }).response
+    try {
+      await r2.post(url, { json: event, headers }).response
+    } catch (err) {
+      console.error('hll: failed to send event to Honeycomb:', err.message)
+    }
   }
 }
 

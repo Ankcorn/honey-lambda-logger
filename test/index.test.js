@@ -110,6 +110,39 @@ test('Should work without context', async () => {
   expect(result).toEqual(event)
 })
 
+test('sendEvent failure in finally does not mask original result', async () => {
+  const event = { testing: true }
+  const context = newContext()
+  const fn = hll(async () => {
+    return event
+  })
+  honeycomb.sendEvent.mockRejectedValue(new Error('honeycomb down'))
+  const spy = jest.spyOn(console, 'error').mockImplementation(() => {})
+  const result = await fn(event, context)
+  expect(result).toEqual(event)
+  expect(spy).toHaveBeenCalledWith(
+    'hll: failed to send event in finally block:',
+    'honeycomb down'
+  )
+  spy.mockRestore()
+})
+
+test('sendEvent failure in finally does not mask original error', async () => {
+  const event = { testing: true }
+  const context = newContext()
+  const fn = hll(async () => {
+    throw new Error('lambda failed')
+  })
+  honeycomb.sendEvent.mockRejectedValue(new Error('honeycomb down'))
+  const spy = jest.spyOn(console, 'error').mockImplementation(() => {})
+  await expect(fn(event, context)).rejects.toThrow('lambda failed')
+  expect(spy).toHaveBeenCalledWith(
+    'hll: failed to send event in finally block:',
+    'honeycomb down'
+  )
+  spy.mockRestore()
+})
+
 test('global setting object should be included', async () => {
   const event = { testing: true }
   const fn = hll(async () => {
